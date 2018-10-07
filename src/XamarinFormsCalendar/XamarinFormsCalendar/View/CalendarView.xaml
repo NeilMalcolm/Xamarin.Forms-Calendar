@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+			 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+			 x:Class="XamarinFormsCalendar.View.CalendarView"
+			 xmlns:controls="clr-namespace:XamarinFormsCalendar.Controls"
+			 xmlns:views="clr-namespace:XamarinFormsCalendar.View"
+			 x:Name="this">
+	<ContentView.Content>
+		<StackLayout x:Name="Container">
+			<Grid x:Name="CalendarNavStack">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="0.33*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="0.33*"/> 
+				</Grid.ColumnDefinitions>
+				<Button x:Name="BackOneMonthButton"
+						Text="&lt;"
+						Clicked="GoBackOneMonth"/>
+				
+				<Label Text="{Binding Source={x:Reference this}, Path=CurrentDate, Mode=OneWay, StringFormat='{0:MMM yy}'}"
+							HorizontalOptions="FillAndExpand"
+						  	VerticalOptions="CenterAndExpand"
+						  	HorizontalTextAlignment="Center"
+							Grid.Column="1"
+						  	InputTransparent="true"/>
+				
+				<DatePicker Date="{Binding Source={x:Reference this}, Path=CurrentDate, Mode=TwoWay}"
+							HorizontalOptions="FillAndExpand"
+							Grid.Column="1"
+							Opacity="0"
+							VerticalOptions="FillAndExpand"/>
+				
+				<Button x:Name="ForwardOneMonthButton"
+						Text="&gt;"
+						Grid.Column="2"
+						Clicked="GoForwardOneMonth"/>
+			</Grid>
+			<Grid x:Name="DaysGrid">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+			
+				<controls:DayOfWeekLabel x:Name="SundayLabel" 
+					   Text="SUN" 
+					   Position="0"
+					   Grid.Column="{Binding Source={x:Reference SundayLabel}, 
+											 Path=Position}"/>
+				
+				<controls:DayOfWeekLabel x:Name="MondayLabel" 
+					   Text="MON" 
+					   Position="1"
+					   Grid.Column="{Binding Source={x:Reference MondayLabel}, 
+											 Path=Position}"/>
+				
+				<controls:DayOfWeekLabel x:Name="TuesdayLabel" 
+					   Text="TUE" 
+					   Position="2"
+					   Grid.Column="{Binding Source={x:Reference TuesdayLabel}, 
+											 Path=Position}"/>
+				
+				<controls:DayOfWeekLabel x:Name="WednesdayLabel" 
+					   Text="WED" 
+					   Position="3"
+					   Grid.Column="{Binding Source={x:Reference WednesdayLabel},
+	       									 Path=Position}"/>
+				
+				<controls:DayOfWeekLabel x:Name="ThursdayLabel" 
+					   Text="THU" 
+					   Position="4"
+					   Grid.Column="{Binding Source={x:Reference ThursdayLabel}, 
+											 Path=Position}"/>
+				
+				<controls:DayOfWeekLabel x:Name="FridayLabel" 
+					   Text="FRI" 
+					   Position="5"
+					   Grid.Column="{Binding Source={x:Reference FridayLabel}, 
+											 Path=Position}"/>
+				
+				<controls:DayOfWeekLabel x:Name="SaturdayLabel" 
+					   Text="SAT" 
+					   Position="6"
+					   Grid.Column="{Binding Source={x:Reference SaturdayLabel}, 
+											 Path=Position}"/>
+			</Grid>
+			<Grid x:Name="MonthGrid" 
+				  RowSpacing="1" 
+				  ColumnSpacing="1" 
+				  VerticalOptions="FillAndExpand"
+				  BackgroundColor="Gray">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+				
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="*"/>
+					<RowDefinition Height="*"/>
+				</Grid.RowDefinitions>
+				
+			</Grid>
+		</StackLayout>
+	</ContentView.Content>
+</ContentView>

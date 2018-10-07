@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
+			 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+			 x:Class="XamarinFormsCalendar.View.CalendarCell">
+	<ContentView.Content>
+		<StackLayout MinimumHeightRequest="100"
+					 Padding="5">
+			<StackLayout.GestureRecognizers>
+				<TapGestureRecognizer Tapped="OnTapped"/>
+			</StackLayout.GestureRecognizers>
+			<Label x:Name="CellLabel"/>
+			<StackLayout x:Name="ContentStack">
+				
+			</StackLayout>
+		</StackLayout>
+	</ContentView.Content>
+</ContentView>

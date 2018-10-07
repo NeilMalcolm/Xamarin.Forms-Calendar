@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
+			 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+			 xmlns:local="clr-namespace:XamarinFormsCalendar" 
+			 x:Class="XamarinFormsCalendar.MainPage"
+			 xmlns:views="clr-namespace:XamarinFormsCalendar.View">
+	<StackLayout>
+		<!-- Place new controls here -->
+ 		<views:CalendarView x:Name="Calendar"
+							VerticalOptions="FillAndExpand"/>
+		<StackLayout Orientation="Horizontal">
+			<Button x:Name="Mon"
+					Text="Monday start"
+					Clicked="Handle_Clicked"/>
+			<Button x:Name="Tue"
+					Text="Tuesday start"
+					Clicked="Handle_Clicked"/>
+			<Button x:Name="Wed"
+					Text="Wednesday start"
+					Clicked="Handle_Clicked"/>
+			<Button x:Name="Thu"
+					Text="Thursday start"
+					Clicked="Handle_Clicked"/>
+			<Button x:Name="Fri"
+					Text="Friday start"
+					Clicked="Handle_Clicked"/>
+			<Button x:Name="Sat"
+					Text="Saturday start"
+					Clicked="Handle_Clicked"/>
+			<Button x:Name="Sun"
+					Text="Sunday start"
+					Clicked="Handle_Clicked"/>
+		</StackLayout>
+	</StackLayout>
+</ContentPage>

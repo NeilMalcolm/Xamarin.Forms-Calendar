@@ -24,11 +24,13 @@
 							Grid.Column="1"
 						  	InputTransparent="true"/>
 				
-				<DatePicker Date="{Binding Source={x:Reference this}, Path=CurrentDate, Mode=TwoWay}"
+				<DatePicker x:Name="CalendarDatePicker"
+							Date="{Binding Source={x:Reference this}, Path=CurrentDate, Mode=TwoWay}"
 							HorizontalOptions="FillAndExpand"
 							Grid.Column="1"
 							Opacity="0"
-							VerticalOptions="FillAndExpand"/>
+							VerticalOptions="FillAndExpand"
+							DateSelected="CalendarDateSelected"/>
 				
 				<Button x:Name="ForwardOneMonthButton"
 						Text="&gt;"

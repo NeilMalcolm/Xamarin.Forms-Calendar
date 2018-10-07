@@ -225,6 +225,31 @@ namespace XamarinFormsCalendar.View
         {
             base.OnPropertyChanged(propertyName);
         }
+
+        CalendarCell _highlightedCell;
+
+        void CalendarDateSelected(object sender, Xamarin.Forms.DateChangedEventArgs e)
+        {
+            if (e.OldDate == e.NewDate)
+                return;
+
+            CurrentDate = e.NewDate;
+
+            if(_highlightedCell != null)
+            {
+                _highlightedCell.Selected = false;
+            }
+
+            var cellIndex = GetCellIndexFromDate(e.NewDate);
+            _highlightedCell = _cells[cellIndex];
+            _highlightedCell.Selected = true;
+        }
+
+        int GetCellIndexFromDate(DateTime date)
+        {
+            var startIndex = GetFirstDayCalendarIndex(new DateTime(date.Year, date.Month, 1).DayOfWeek);
+            return _currentDate.Day - 1 + startIndex;
+        }
     }
 
     public sealed class DateHelper

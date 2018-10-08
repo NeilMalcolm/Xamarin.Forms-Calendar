@@ -25,7 +25,7 @@
 						  	InputTransparent="true"/>
 				
 				<DatePicker x:Name="CalendarDatePicker"
-							Date="{Binding Source={x:Reference this}, Path=CurrentDate, Mode=TwoWay}"
+							Date="{Binding Source={x:Reference this}, Path=SelectedDate, Mode=TwoWay}"
 							HorizontalOptions="FillAndExpand"
 							Grid.Column="1"
 							Opacity="0"

@@ -6,11 +6,15 @@ using System.Linq;
 using XamarinFormsCalendar.Controls;
 using Xamarin.Forms.Internals;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace XamarinFormsCalendar.View
 {
     public partial class CalendarView : ContentView, INotifyPropertyChanged
     {
+        CalendarCell _highlightedCell;
+
         CalendarCell[] _cells = new CalendarCell[42];
         DayOfWeekLabel[] _dayOfWeekLabels;
         int _startPos = 0;
@@ -19,6 +23,8 @@ namespace XamarinFormsCalendar.View
         DayOfWeek _startOfWeek = DayOfWeek.Sunday;
         DateTime _currentDate = DateTime.Now;
         bool _selectBetweenTwoDatesMode = false;
+        DateTime? _selectedDate;
+        bool _canSelectDate = false;
 
         public DayOfWeek StartOfWeek 
         {
@@ -42,6 +48,17 @@ namespace XamarinFormsCalendar.View
                 OnPropertyChanged("CurrentMonth");
             }
         }
+
+        public DateTime? SelectedDate
+        {
+            get => _selectedDate == null ? _currentDate : _selectedDate;
+            set
+            {
+                if (_selectedDate == null)
+                    _selectedDate = value;
+            }
+        }
+
 
         public string CurrentMonth 
         {
@@ -104,8 +121,8 @@ namespace XamarinFormsCalendar.View
             DateTime nextMonth = date.AddMonths(1);
             for (int i = 0; i < _cells.Length; i++)
             {
+                _cells[i].Selected = false;
                 _cells[i].Tapped -= Handle_Tapped;
-
                 if (i < firstDayIndex)
                 {
                     var newDate = new DateTime(prevMonth.Year, 
@@ -128,11 +145,15 @@ namespace XamarinFormsCalendar.View
                 }
                 else
                 {
-                    _cells[i].Date = new DateTime(date.Year, date.Month, day);
+                    var newDate = new DateTime(date.Year, date.Month, day);
+                    _cells[i].BackgroundColor = Color.Red;
+                    _cells[i].Date = newDate;
+                    _cells[i].IsEnabled = true;
                     _cells[i].Tapped += Handle_Tapped;
+                    if (newDate == _selectedDate)
+                        _cells[i].Selected = true;
                     day++;
                 }
-
             }
         }
 
@@ -141,6 +162,22 @@ namespace XamarinFormsCalendar.View
 
         void Handle_Tapped(CalendarCellSelectedArgs args)
         {
+            CalendarCell cell = args.Cell;
+            if (cell == _highlightedCell)
+            {
+                _highlightedCell.Selected = false;
+                _highlightedCell = null;
+                _selectedDate = null;
+            }
+            else
+            {
+                if (_highlightedCell != null)
+                    _highlightedCell.Selected = false;
+
+                _highlightedCell = cell;
+                _highlightedCell.Selected = true;
+                _selectedDate = cell.Date;
+            }
         }
 
         void StartOfWeekChanged()
@@ -226,8 +263,6 @@ namespace XamarinFormsCalendar.View
             base.OnPropertyChanged(propertyName);
         }
 
-        CalendarCell _highlightedCell;
-
         void CalendarDateSelected(object sender, Xamarin.Forms.DateChangedEventArgs e)
         {
             if (e.OldDate == e.NewDate)
@@ -245,6 +280,12 @@ namespace XamarinFormsCalendar.View
             _highlightedCell.Selected = true;
         }
 
+
+        /// <summary>
+        /// Gets the position of the cell that represents the given date
+        /// </summary>
+        /// <returns>The cell index representing the date</returns>
+        /// <param name="date">Date</param>
         int GetCellIndexFromDate(DateTime date)
         {
             var startIndex = GetFirstDayCalendarIndex(new DateTime(date.Year, date.Month, 1).DayOfWeek);

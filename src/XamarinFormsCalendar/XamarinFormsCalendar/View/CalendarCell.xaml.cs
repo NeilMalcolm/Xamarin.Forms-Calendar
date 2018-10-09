@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using Xamarin.Forms;
 
 namespace XamarinFormsCalendar.View
@@ -10,9 +9,9 @@ namespace XamarinFormsCalendar.View
         Color _defaultBackgroundColor = Color.White;
         Color _defaultDisabledBackgroundColor = new Color(0.9, 0.9, 0.9);
 
-        public int Index { get; set; }
-
         public event Action<CalendarCellSelectedArgs> Tapped;
+
+        #region Bindable Properties
 
         public static readonly BindableProperty DayProperty =
             BindableProperty.Create("Day",
@@ -23,12 +22,6 @@ namespace XamarinFormsCalendar.View
                                     null,
                                     CellTextChanged);
 
-        public string Day
-        {
-            get => (string)GetValue(DayProperty);
-            set => SetValue(DayProperty, value);
-        }
-
         public static readonly BindableProperty SelectedProperty =
             BindableProperty.Create("Selected",
                                     typeof(bool),
@@ -38,11 +31,6 @@ namespace XamarinFormsCalendar.View
                                     null,
                                     OnSelected);
 
-        public bool Selected
-        {
-            get => (bool)GetValue(SelectedProperty);
-            set => SetValue(SelectedProperty, value);
-        }
 
         public static readonly BindableProperty SelectedColorProperty =
             BindableProperty.Create("SelectedColor",
@@ -51,12 +39,36 @@ namespace XamarinFormsCalendar.View
                                     Color.SkyBlue,
                                     BindingMode.TwoWay);
 
+#endregion
+
+        /// <summary>
+        /// Gets or sets 
+        /// </summary>
+        /// <value>The day.</value>
+        public string Day
+        {
+            get => (string)GetValue(DayProperty);
+            set => SetValue(DayProperty, value);
+        }
+
+        public bool Selected
+        {
+            get => (bool)GetValue(SelectedProperty);
+            set => SetValue(SelectedProperty, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the color of the cell when selected
+        /// </summary>
         public Color SelectedColor
         {
             get => (Color)GetValue(SelectedColorProperty);
             set => SetValue(SelectedColorProperty, value);
         }
 
+        /// <summary>
+        /// Gets or sets the date this cell is representing
+        /// </summary>
         public DateTime Date
         {
             get { return _date; }
@@ -67,17 +79,23 @@ namespace XamarinFormsCalendar.View
             }
         }
 
+        /// <summary>
+        /// The index in the Calendar that this grid represents
+        /// </summary>
+        /// <value>The index.</value>
+        public int Index { get; internal set; }
+
         public CalendarCell()
         {
             InitializeComponent();
-            CellLabel.Text = Day;
+            CellDateLabel.Text = Day;
             BackgroundColor = _defaultBackgroundColor;
         }
 
         static void CellTextChanged(BindableObject bindable, object oldValue, object newValue)
         {
             var cell = (bindable as CalendarCell);
-            cell.CellLabel.Text = (string)newValue;
+            cell.CellDateLabel.Text = (string)newValue;
             if (cell.BackgroundColor != cell._defaultBackgroundColor)
                 cell.BackgroundColor = cell._defaultBackgroundColor;
         }

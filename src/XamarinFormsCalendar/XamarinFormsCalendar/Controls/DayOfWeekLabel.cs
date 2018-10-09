@@ -11,6 +11,13 @@ namespace XamarinFormsCalendar.Controls
                                     typeof(DayOfWeekLabel), 
                                     -1);
 
+        /// <summary>
+        /// Represents the DayOfWeek position of this label. 
+        /// </summary>
+        /// <remarks>
+        /// 0 indicates the first (left-most) element, with 6 being the
+        /// last (right-most). -1 indicates no position specified.
+        /// </remarks>
         public int Position
         {
             get { return (int)GetValue(PositionProperty); }
@@ -19,7 +26,6 @@ namespace XamarinFormsCalendar.Controls
 
         public DayOfWeekLabel() : base()
         {
-
         }
     }
 }

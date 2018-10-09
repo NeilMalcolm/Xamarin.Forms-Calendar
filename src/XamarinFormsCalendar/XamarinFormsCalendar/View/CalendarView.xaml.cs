@@ -129,8 +129,7 @@ namespace XamarinFormsCalendar.View
                                                prevMonth.Month, 
                                                DateTime.DaysInMonth(prevMonth.Year, prevMonth.Month) - (firstDayIndex-1)+i);
                     _cells[i].Date = newDate;
-                    _cells[i].BackgroundColor = Color.Silver;
-                    _cells[i].IsEnabled = false;
+                    _cells[i].SetEnabledState(false);
                 }
                 else if(i > (daysInMonth - 1 + firstDayIndex))
                 {
@@ -139,16 +138,14 @@ namespace XamarinFormsCalendar.View
                                                nextMonth.Month,
                                                day-daysInMonth);
                     _cells[i].Date = newDate;
-                    _cells[i].BackgroundColor = Color.Silver;
-                    _cells[i].IsEnabled = false;
+                    _cells[i].SetEnabledState(false);
                     day++;
                 }
                 else
                 {
                     var newDate = new DateTime(date.Year, date.Month, day);
-                    _cells[i].BackgroundColor = Color.Red;
                     _cells[i].Date = newDate;
-                    _cells[i].IsEnabled = true;
+                    _cells[i].SetEnabledState(true);
                     _cells[i].Tapped += Handle_Tapped;
                     if (newDate == _selectedDate)
                         _cells[i].Selected = true;

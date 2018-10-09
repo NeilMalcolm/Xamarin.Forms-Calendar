@@ -8,7 +8,8 @@
 			<StackLayout.GestureRecognizers>
 				<TapGestureRecognizer Tapped="OnTapped"/>
 			</StackLayout.GestureRecognizers>
-			<Label x:Name="CellLabel"/>
+			<Label x:Name="CellLabel"
+				   FontSize="18"/>
 			<StackLayout x:Name="ContentStack">
 				
 			</StackLayout>

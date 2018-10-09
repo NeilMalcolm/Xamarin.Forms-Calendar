@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Xamarin.Forms;
 
@@ -9,6 +8,7 @@ namespace XamarinFormsCalendar.View
     {
         DateTime _date;
         Color _defaultBackgroundColor = Color.White;
+        Color _defaultDisabledBackgroundColor = new Color(0.9, 0.9, 0.9);
 
         public int Index { get; set; }
 
@@ -96,6 +96,12 @@ namespace XamarinFormsCalendar.View
         void OnTapped(object sender, System.EventArgs e)
         {
             Tapped?.Invoke(new CalendarCellSelectedArgs(this, _date));
+        }
+
+        public void SetEnabledState(bool isEnabled)
+        {
+            IsEnabled = isEnabled;
+            BackgroundColor = isEnabled ? _defaultBackgroundColor : _defaultDisabledBackgroundColor;
         }
     }
 

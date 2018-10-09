@@ -15,6 +15,7 @@
   <ItemGroup>
     <Folder Include="View\" />
     <Folder Include="Controls\" />
+    <Folder Include="Enums\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="View\CalendarCell.cs" />

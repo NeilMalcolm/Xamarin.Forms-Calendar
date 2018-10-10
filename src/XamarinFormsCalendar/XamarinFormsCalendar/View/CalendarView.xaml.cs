@@ -8,35 +8,58 @@ using Xamarin.Forms.Internals;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using XamarinFormsCalendar.Enums;
+using System.Windows.Input;
 
 namespace XamarinFormsCalendar.View
 {
+    public class CalendarRangeSelectedArgs : EventArgs
+    {
+        public CalendarCell StartCell { get; set; }
+        public CalendarCell EndCell { get; set; }
+
+        public CalendarRangeSelectedArgs(CalendarCell start, CalendarCell end)
+        {
+            StartCell = start;
+            EndCell = end;
+        }
+    }
+
     public partial class CalendarView : ContentView, INotifyPropertyChanged
     {
         CalendarCell _highlightedCell;
-
         CalendarCell[] _cells = new CalendarCell[42];
+
+        CalendarCell _startCell;    // Represents the earliest cell selected in range
+        CalendarCell _endCell;      // Represents the latest cell selected in range
+
         DayOfWeekLabel[] _dayOfWeekLabels;
         int _startPos = 0;
         DayOfWeekLabel[] _dayOfWeekWithSelectedDayInFront = new DayOfWeekLabel[7];
-
+        List<DateTime> _selectedDates;
         DayOfWeek _startOfWeek = DayOfWeek.Sunday;
         DateTime _currentDate = DateTime.Now;
-        bool _selectBetweenTwoDatesMode = false;
         DateTime? _selectedDate;
-        bool _canSelectDate = false;
 
+        public event Action<CalendarCellSelectedArgs> CellSelected;
+        public event Action<CalendarRangeSelectedArgs> RangeEndCellSelected;
+
+        /// <summary>
+        /// Gets or sets the day at the start of week. Default Sunday.
+        /// </summary>
         public DayOfWeek StartOfWeek 
         {
             get => _startOfWeek;
             set 
             {
                 _startOfWeek = value;
-
                 StartOfWeekChanged();
             } 
         }
 
+        /// <summary>
+        /// Gets or sets the current date being displayed by the calendar.
+        /// </summary>
         public DateTime CurrentDate
         {
             get { return _currentDate; }
@@ -49,9 +72,13 @@ namespace XamarinFormsCalendar.View
             }
         }
 
+        /// <summary>
+        /// Gets or sets the selected date.
+        /// </summary>
+        /// <value>The selected date.</value>
         public DateTime? SelectedDate
         {
-            get => _selectedDate == null ? _currentDate : _selectedDate;
+            get => _selectedDate ?? _currentDate;
             set
             {
                 if (_selectedDate == null)
@@ -59,7 +86,20 @@ namespace XamarinFormsCalendar.View
             }
         }
 
+        /// <summary>
+        /// Gets or sets the selected dates.
+        /// </summary>
+        /// <value>The selected dates.</value>
+        public List<DateTime> SelectedDates
+        {
+            get { return _selectedDates; }
+            set { _selectedDates = value; }
+        }
 
+        /// <summary>
+        /// Gets the friendly current month string
+        /// </summary>
+        /// <value>The current month.</value>
         public string CurrentMonth 
         {
             get
@@ -68,11 +108,38 @@ namespace XamarinFormsCalendar.View
             }
         }
 
-        public bool SelectBetweenTWoDatesMode
+#region Bindable Properties
+
+        public static readonly BindableProperty SelectionModeProperty = 
+            BindableProperty.Create("SelectionMode", 
+                                    typeof(CalendarSelectionMode), 
+                                    typeof(CalendarView), 
+                                    CalendarSelectionMode.Single);
+
+        /// <summary>
+        /// Gets or sets the selection mode for the calendar view.
+        /// </summary>
+        public CalendarSelectionMode SelectionMode
         {
-            get { return _selectBetweenTwoDatesMode; }
-            set { _selectBetweenTwoDatesMode = value; }
+            get => (CalendarSelectionMode)GetValue(SelectionModeProperty);
+            set => SetValue(SelectionModeProperty, value);
         }
+
+        public static readonly BindableProperty CellSelectedCommandProperty =
+            BindableProperty.Create("CellSelectedCommand",
+                                    typeof(ICommand),
+                                    typeof(CalendarView),
+                                    null);
+
+
+        public ICommand CellSelectedCommand
+        {
+            get => (ICommand)GetValue(CellSelectedCommandProperty);
+            set => SetValue(CellSelectedCommandProperty, value);
+        }
+
+
+#endregion
 
         public CalendarView()
         {
@@ -88,10 +155,14 @@ namespace XamarinFormsCalendar.View
                 SaturdayLabel
             };
             _dayOfWeekWithSelectedDayInFront = _dayOfWeekLabels;
-
+            
             InitCells();
+            //Container.FadeTo(1, 1000, Easing.CubicOut);
         }
 
+        /// <summary>
+        /// Initialises the cells used for the Calendar View
+        /// </summary>
         void InitCells()
         {
             var count = 0;
@@ -99,18 +170,27 @@ namespace XamarinFormsCalendar.View
             {
                 for (int j = 0; j < 7; j++)
                 {
-                    _cells[count] = new CalendarCell();
-                    _cells[count].Index = count;
+                    _cells[count] = new CalendarCell
+                    {
+                        Index = count
+                    };
                     Grid.SetRow(_cells[count], i);
                     Grid.SetColumn(_cells[count], j);
                     MonthGrid.Children.Add(_cells[count]);
+                    _cells[count].Tapped += OnCellTapped;
                     count++;
                 }
             }
         }
 
+        /// <summary>
+        /// Sets up the calendar cells for the given date. Creates all cells from the 1st of month
+        /// until the end. And creates cells for visible days preceeding and following the given month.
+        /// </summary>
+        /// <param name="date">Date.</param>
         void SetupCellsForDate(DateTime date)
         {
+            // Ensure our iteration begins on the 1st day of month.
             if (date.Day > 1)
                 date = new DateTime(date.Year, date.Month, 1);
 
@@ -122,31 +202,32 @@ namespace XamarinFormsCalendar.View
             for (int i = 0; i < _cells.Length; i++)
             {
                 _cells[i].Selected = false;
-                _cells[i].Tapped -= Handle_Tapped;
                 if (i < firstDayIndex)
                 {
+                    // If the current cell preceeds the 1st of the month.
                     var newDate = new DateTime(prevMonth.Year, 
                                                prevMonth.Month, 
                                                DateTime.DaysInMonth(prevMonth.Year, prevMonth.Month) - (firstDayIndex-1)+i);
                     _cells[i].Date = newDate;
-                    _cells[i].SetEnabledState(false);
+                    _cells[i].SetOutOfMonthState(false);
                 }
                 else if(i > (daysInMonth - 1 + firstDayIndex))
                 {
-
+                    // If the cell is after the end of the month.
                     var newDate = new DateTime(nextMonth.Year,
                                                nextMonth.Month,
                                                day-daysInMonth);
                     _cells[i].Date = newDate;
-                    _cells[i].SetEnabledState(false);
+                    _cells[i].SetOutOfMonthState(false);
                     day++;
                 }
                 else
                 {
+                    // If the current cell is within the current month.
                     var newDate = new DateTime(date.Year, date.Month, day);
                     _cells[i].Date = newDate;
-                    _cells[i].SetEnabledState(true);
-                    _cells[i].Tapped += Handle_Tapped;
+                    _cells[i].SetOutOfMonthState(true);
+                    //_cells[i].Tapped += OnCellTapped;
                     if (newDate == _selectedDate)
                         _cells[i].Selected = true;
                     day++;
@@ -154,26 +235,150 @@ namespace XamarinFormsCalendar.View
             }
         }
 
-        DateTime _lowerSelected;
-        DateTime _higherSelected;
+        //public void AddEvent(CalendarCell cell, string title, DateTime start, DateTime end)
+        //{
+        //    cell.AddEvent(title, start, end);
+        //}
 
-        void Handle_Tapped(CalendarCellSelectedArgs args)
+        void OnCellTapped(CalendarCellSelectedArgs args)
         {
-            CalendarCell cell = args.Cell;
+            if(!args.Cell.IsOutOfMonth)
+            {
+                //AddEvent(args.Cell, "New Event", DateTime.Now, DateTime.Now.AddHours(1));
+                if (SelectionMode == CalendarSelectionMode.Single)
+                    HandleCellTappedInSingleSelectionMode(args);
+                else
+                    HandleCellTappedInRangeSelectionMode(args);
+            }
+            else
+            {
+                HandleOutOfMonthCellTappedInSingleSelectionMode(args);
+            }
+        }
+
+        /// <summary>
+        /// Handles the out of month cell tapped in single selection mode.
+        /// </summary>
+        async void HandleOutOfMonthCellTappedInSingleSelectionMode(CalendarCellSelectedArgs args)
+        {
+            // TODO: change current month to new month
+            // change selected date to selected date
+
+            _currentDate = args.Date;
+            OnPropertyChanged("CalendarMonth");
+            await Task.Run(() =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    SetupCellsForDate(args.Date);
+                });
+            });
+            DoCellSelection(_currentDate);
+        }
+
+        /// <summary>
+        /// Handles the cell tapped event when in single selection mode.
+        /// </summary>
+        /// <param name="args">Arguments of the cell tapped event</param>
+        void HandleCellTappedInSingleSelectionMode(CalendarCellSelectedArgs args)
+        {
+            var cell = args.Cell;
             if (cell == _highlightedCell)
             {
+                // de-select cell
                 _highlightedCell.Selected = false;
                 _highlightedCell = null;
                 _selectedDate = null;
             }
             else
             {
+                // select cell
                 if (_highlightedCell != null)
                     _highlightedCell.Selected = false;
 
                 _highlightedCell = cell;
                 _highlightedCell.Selected = true;
                 _selectedDate = cell.Date;
+                CellSelected?.Invoke(new CalendarCellSelectedArgs(cell, cell.Date ));
+                CellSelectedCommand?.Execute(cell);
+            }
+        }
+
+        void DoCellSelection(DateTime dateOfCell)
+        {
+            var index = GetCellIndexFromDate(dateOfCell);
+            var cell = _cells[index];
+            Console.WriteLine("SELECRED INDEX: " + index);
+            if(_highlightedCell != null)
+            {
+                _highlightedCell.Selected = false;
+                _highlightedCell = null;
+            }
+            HandleCellTappedInSingleSelectionMode(new CalendarCellSelectedArgs(cell, dateOfCell));
+        }
+
+        /// <summary>
+        /// Handles the cell tapped event when in range selection mode.
+        /// </summary>
+        /// <param name="args">Arguments of the cell tapped event</param>
+        void HandleCellTappedInRangeSelectionMode(CalendarCellSelectedArgs args)
+        {
+            //var selectedCell = args.Cell;
+            //if(_startCell is null)
+            //{
+            //    // If we haven't selected any cells yet.
+            //    _startCell = selectedCell;
+            //    _startCell.Selected = true;
+            //}
+            //else if(_endCell is null)
+            //{
+            //    // If we have selected the first cell, but not a second
+            //    if(_startCell.Date < selectedCell.Date)
+            //    {
+            //        _endCell = selectedCell;
+            //        _endCell.Selected = true;
+            //    }
+            //    else if(_startCell.Date > selectedCell.Date)
+            //    {
+            //        _endCell = _startCell;
+            //        _startCell = selectedCell;
+            //        _startCell.Selected = true;
+            //        SelectAllCellsBetweenRange(_startCell, _endCell);
+            //    }
+            //    else if(_startCell.Date == selectedCell.Date)
+            //    {
+            //        _startCell.Selected = false;
+            //        _startCell = null;
+            //    }
+            //}
+            //else if(_startCell != null && _endCell != null)
+            //{
+            //    // If we have selected two cells and are selecting more
+
+            //}
+        }
+
+        void SelectAllCellsBetweenRange(CalendarCell start, CalendarCell end)
+        {
+            if (start.Date > end.Date || start.Date == end.Date)
+                return;
+
+            for (int i = start.Index; i <= end.Index; i++)
+            {
+                if (!_cells[i].Selected)
+                    _cells[i].Selected = true;
+            }
+        }
+
+        void DeselectAllCellsBetweenRange(CalendarCell start, CalendarCell end)
+        {
+            if (start.Date > end.Date || start.Date == end.Date)
+                return;
+
+            for (int i = start.Index; i <= end.Index; i++)
+            {
+                if(_cells[i].Selected)
+                    _cells[i].Selected = false;
             }
         }
 

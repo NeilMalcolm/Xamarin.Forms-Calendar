@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ContentView xmlns="http://xamarin.com/schemas/2014/forms" 
 			 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
-			 x:Class="XamarinFormsCalendar.View.CalendarCell">
+			 x:Class="XamarinFormsCalendar.View.CalendarCell"
+			 IsClippedToBounds="true">
 	<ContentView.Content>
-		<StackLayout MinimumHeightRequest="100"
+		<ScrollView>
+			<StackLayout MinimumHeightRequest="100"
 					 Padding="5">
 			<StackLayout.GestureRecognizers>
 				<TapGestureRecognizer Tapped="OnTapped"/>
 			</StackLayout.GestureRecognizers>
 			<Label x:Name="CellDateLabel"
-				   FontSize="18"/>
+				   FontSize="18"
+				   HorizontalTextAlignment="End"/>
 			<StackLayout x:Name="ContentStack">
 				
 			</StackLayout>
 		</StackLayout>
+		</ScrollView>
 	</ContentView.Content>
 </ContentView>

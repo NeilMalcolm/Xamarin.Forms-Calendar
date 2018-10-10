@@ -79,6 +79,11 @@ namespace XamarinFormsCalendar.View
             }
         }
 
+        internal bool IsOutOfMonth
+        {
+            get; set;
+        }
+
         /// <summary>
         /// The index in the Calendar that this grid represents
         /// </summary>
@@ -116,11 +121,22 @@ namespace XamarinFormsCalendar.View
             Tapped?.Invoke(new CalendarCellSelectedArgs(this, _date));
         }
 
-        public void SetEnabledState(bool isEnabled)
+        public void SetOutOfMonthState(bool isEnabled)
         {
-            IsEnabled = isEnabled;
+            //IsEnabled = isEnabled;
+            IsOutOfMonth = !isEnabled;
             BackgroundColor = isEnabled ? _defaultBackgroundColor : _defaultDisabledBackgroundColor;
         }
+
+        //public void AddEvent(string title, DateTime start, DateTime end)
+        //{
+        //    ContentStack.Children.Add(new EventView
+        //    {
+        //        StartTime = start,
+        //        EndTime = end,
+        //        Title = title
+        //    });
+        //}
     }
 
     public class CalendarCellSelectedArgs : EventArgs

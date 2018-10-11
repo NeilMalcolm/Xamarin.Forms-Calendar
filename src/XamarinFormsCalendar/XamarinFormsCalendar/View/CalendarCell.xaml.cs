@@ -121,11 +121,10 @@ namespace XamarinFormsCalendar.View
             Tapped?.Invoke(new CalendarCellSelectedArgs(this, _date));
         }
 
-        public void SetOutOfMonthState(bool isEnabled)
+        public void SetOutOfMonthState(bool isOutOfMonth)
         {
-            //IsEnabled = isEnabled;
-            IsOutOfMonth = isEnabled;
-            BackgroundColor = isEnabled ? _defaultBackgroundColor : _defaultDisabledBackgroundColor;
+            IsOutOfMonth = isOutOfMonth;
+            BackgroundColor = isOutOfMonth ? _defaultDisabledBackgroundColor : _defaultBackgroundColor;
         }
 
         //public void AddEvent(string title, DateTime start, DateTime end)

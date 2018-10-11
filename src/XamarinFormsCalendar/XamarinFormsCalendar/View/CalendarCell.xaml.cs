@@ -124,7 +124,7 @@ namespace XamarinFormsCalendar.View
         public void SetOutOfMonthState(bool isEnabled)
         {
             //IsEnabled = isEnabled;
-            IsOutOfMonth = !isEnabled;
+            IsOutOfMonth = isEnabled;
             BackgroundColor = isEnabled ? _defaultBackgroundColor : _defaultDisabledBackgroundColor;
         }
 

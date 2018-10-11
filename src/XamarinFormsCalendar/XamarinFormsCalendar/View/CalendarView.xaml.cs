@@ -205,20 +205,20 @@ namespace XamarinFormsCalendar.View
                 if (i < firstDayIndex)
                 {
                     // If the current cell preceeds the 1st of the month.
-                    var newDate = new DateTime(prevMonth.Year, 
-                                               prevMonth.Month, 
-                                               DateTime.DaysInMonth(prevMonth.Year, prevMonth.Month) - (firstDayIndex-1)+i);
+                    var newDate = new DateTime(prevMonth.Year,
+                                               prevMonth.Month,
+                                               DateTime.DaysInMonth(prevMonth.Year, prevMonth.Month) - (firstDayIndex - 1) + i);
                     _cells[i].Date = newDate;
-                    _cells[i].SetOutOfMonthState(false);
+                    _cells[i].SetOutOfMonthState(true);
                 }
-                else if(i > (daysInMonth - 1 + firstDayIndex))
+                else if (i > (daysInMonth - 1 + firstDayIndex))
                 {
                     // If the cell is after the end of the month.
                     var newDate = new DateTime(nextMonth.Year,
                                                nextMonth.Month,
-                                               day-daysInMonth);
+                                               day - daysInMonth);
                     _cells[i].Date = newDate;
-                    _cells[i].SetOutOfMonthState(false);
+                    _cells[i].SetOutOfMonthState(true);
                     day++;
                 }
                 else
@@ -226,19 +226,17 @@ namespace XamarinFormsCalendar.View
                     // If the current cell is within the current month.
                     var newDate = new DateTime(date.Year, date.Month, day);
                     _cells[i].Date = newDate;
-                    _cells[i].SetOutOfMonthState(true);
+                    _cells[i].SetOutOfMonthState(false);
                     //_cells[i].Tapped += OnCellTapped;
                     if (newDate == _selectedDate)
+                    {
                         _cells[i].Selected = true;
+                        _highlightedCell = _cells[i];
+                    }
                     day++;
                 }
             }
         }
-
-        //public void AddEvent(CalendarCell cell, string title, DateTime start, DateTime end)
-        //{
-        //    cell.AddEvent(title, start, end);
-        //}
 
         void OnCellTapped(CalendarCellSelectedArgs args)
         {
@@ -264,7 +262,13 @@ namespace XamarinFormsCalendar.View
             // TODO: change current month to new month
             // change selected date to selected date
 
-            _currentDate = args.Date;
+            if (_highlightedCell != null)
+            {
+                _highlightedCell.Selected = false;
+                _highlightedCell = null;
+            }
+            _selectedDate = args.Date;
+            _currentDate = _selectedDate.Value;
             OnPropertyChanged("CalendarMonth");
             await Task.Run(() =>
             {
@@ -273,7 +277,7 @@ namespace XamarinFormsCalendar.View
                     SetupCellsForDate(args.Date);
                 });
             });
-            DoCellSelection(_currentDate);
+            //DoCellSelection(_currentDate);
         }
 
         /// <summary>
@@ -302,19 +306,6 @@ namespace XamarinFormsCalendar.View
                 CellSelected?.Invoke(new CalendarCellSelectedArgs(cell, cell.Date ));
                 CellSelectedCommand?.Execute(cell);
             }
-        }
-
-        void DoCellSelection(DateTime dateOfCell)
-        {
-            var index = GetCellIndexFromDate(dateOfCell);
-            var cell = _cells[index];
-            Console.WriteLine("SELECRED INDEX: " + index);
-            if(_highlightedCell != null)
-            {
-                _highlightedCell.Selected = false;
-                _highlightedCell = null;
-            }
-            HandleCellTappedInSingleSelectionMode(new CalendarCellSelectedArgs(cell, dateOfCell));
         }
 
         /// <summary>
